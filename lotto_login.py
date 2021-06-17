@@ -1,110 +1,99 @@
 #Simphiwe Sithole
 
-import datetime
 from tkinter import *
 from tkinter import messagebox
-from validate_email import validate_email
-import rsaidnumber
-from dateutil import relativedelta
-root = Tk()
-img = PhotoImage(file='ithuba.png')
-img = img.subsample(16)
-lbl_image = Label(root, image=img, bg="yellow")
-lbl_image.place(x=240, y=260)
+import datetime
+from datetime import date
+from PIL import Image, ImageTk
 
 
-class EmailError(Exception):
-    pass
-class IdLengthError(Exception):
-    pass
-
-class LottoGUI:
+class Login:
     def __init__(self, master):
-#THIS IS THE WINDOW SET UP ..
-
         self.master = master
-        self.master.title("")
-        self.master.geometry("600x400")
-        self.master.config(bg="blue")
+        self.master.title('Lotto Machine: Simphiwe Sithole')
+        self.master.geometry("740x500")
+        self.master.configure(bg='yellow')
+        self.master.resizable(False, False)
 
-#THIS IS THE LOGIN PAGE..
+        self.my_image = ImageTk.PhotoImage(Image.open("lotto.png"))
+        self.image_label = Label(image=self.my_image, bg='yellow', pady=45, padx=45)
+        self.image_label.place(x=280, y=30)
 
-        self.frame = Frame(self.master, width=450, height=200, bg="green")
-        self.frame.place(x=25, y=95)
-        self.lbl_head = Label(self.master, text="FEELING LUCKY\nTODAY?\n", width=12, font="monospace 12 bold", bg="yellow", fg="red")
-        self.lbl_head.place(x=160, y=20)
-        self.lbl_subhead = Label(self.frame, text="Wanna play? Please enter your details", font="Garuda 12 bold", bg="yellow", fg="red")
-        self.lbl_subhead.place(x=80, y=20)
+        self.frm = LabelFrame(master)
+        self.frm.place(x=50, y=150, width=645, height=300)
+
+        self.lbl1 = Label(self.frm, text="Enter your date of birth", font=("arial", 12))
+        self.lbl1.place(x=230, y=40)
+
+        self.year_entry = Entry(self.frm, width=4)
+        self.year_entry.place(x=235, y=90)
+        self.year_entry.insert(0, 'yyyy')
+        self.year_entry.bind("<Button-1>", lambda event: self.clear_entry(event, self.year_entry))
+
+        self.month_entry = Entry(self.frm, width=3)
+        self.month_entry.place(x=300, y=90)
+        self.month_entry.insert(0, 'mm')
+        self.month_entry.bind("<Button-1>", lambda event: self.clear_entry(event, self.month_entry))
+
+        self.day_entry = Entry(self.frm, width=3)
+        self.day_entry.place(x=350, y=90)
+        self.day_entry.insert(0, 'dd')
+        self.day_entry.bind("<Button-1>", lambda event: self.clear_entry(event, self.day_entry))
+
+        self.btn = Button(self.frm, text="Play", font=("arial", 10, "bold"), bg="skyblue", fg="white", padx=50, command=self.login)
+        self.btn.place(x=250, y=140)
+
+        # Exit button
+        self.exit_btn = Button(self.frm, text="Exit", bg="red", fg="white", font=('arial', 10, 'bold'), padx=40, command=self.exit)
+        self.exit_btn.place(x=520, y=250)
 
 
-        self.lbl_name = Label(self.frame, text="Name", font="Garuda 12", bg="green", fg="white")
-        self.lbl_email = Label(self.frame, text="Email", font="Garuda 12", bg="green", fg="white")
-        self.lbl_id = Label(self.frame, text="South African ID number", font="Garuda 12", bg="green", fg="white")
-        self.lbl_name.place(x=60, y=60)
-        self.lbl_email.place(x=60, y=100)
-        self.lbl_id.place(x=60, y=140)
+    def calc_age(self):
+        self.my_date = datetime.date(int(self.year_entry.get()), int(self.month_entry.get()), int(self.day_entry.get()))
+        self.today = date.today()
+        self.age = self.today.year - self.my_date.year
 
-        #THIS ARE THE FUNCTION AND DETAILS OF THE LOGIN PAGE
+        print(self.age)
+        return self.age
 
-        self.entry_email = Entry(self.frame, borderwidth="0")
-        self.entry_name = Entry(self.frame, borderwidth="0")
-        self.entry_id = Entry(self.frame, borderwidth="0")
-        self.entry_name.place(x=245, y=67)
-        self.entry_email.place(x=245, y=107)
-        self.entry_id.place(x=245, y=147)
 
-        #CREATING BUTTONS THAT WILL VALIDATE
-        self.btn_validate = Button(self.master, text="Validate", bg="green", fg="green", borderwidth="0",
-                                   highlightbackground="red", activebackground="red",
-                                   activeforeground="yellow", command=self.validate)
-        self.btn_validate.place(x=30, y=340)
+    def clear_entry(self,event, entry):
+        entry.delete(0, END)
 
-        #CREATING BUTTONS THAT WILL CLEAR WHEN ACTIVATED...
+    def login(self):
 
-        self.btn_clear = Button(self.master, text="Clear", bg="green", fg="green", borderwidth="0",
-                                highlightbackground="red", activebackground="red", activeforeground="blue",
-                                command=self.clear)
-        self.btn_clear.place(x=350, y=340)
-
-        #THIS BUTTON WILL EXIT THE APPLICATION WHEN ACTIVATED ...
-        self.btn_exit = Button(self.master, text="Exit", bg="green", fg="green", borderwidth="0",
-                               highlightbackground="yellow", activebackground="yellow",
-                               activeforeground="red", command=exit)
-        self.btn_exit.place(x=430, y=340)
-
-        self.master.mainloop()
-
-    def clear(self):
-        self.entry_name.delete(0, 'end')
-        self.entry_email.delete(0, 'end')
-        self.entry_id.delete(0, 'end')
-
-    def validate(self):
         try:
-            if not validate_email(self.entry_email.get()):
-                raise EmailError
+            self.age = self.calc_age()
+            self.today = date.today()
 
-            int(self.entry_id.get())
-            id = (self.entry_id.get())
-            date_of_birth = rsaidnumber.parse(id).date_of_birth
-            if len(id) < 13 or len(id) > 13:
-                raise IdLengthError
-            elif relativedelta.relativedelta(datetime.datetime.today(), date_of_birth).years < 18:
-                messagebox.showerror("Error", "You are too young to play. Try again next time.")
-
+            if self.age < 0:
+                messagebox.showinfo("Date error", "Your birth date cannot in the future")
+            elif self.age <= 5:
+                messagebox.showinfo("Too young", "What do you even know about lotto")
+            elif 18 <= self.age <= 110 and type(self.age) == int:
+                messagebox.showinfo("Successful", "Congatulations you qualify to play")
+                file = open('lotto_storage.txt', 'w')
+                file.write('File created on: ' + str(self.today) + "\n \n")
+                file.close()
+                self.master.destroy()
+                import lotto
+                lotto.Lotto
+            elif type(self.age) == str:
+                messagebox.showerror("Invalid Input", "Please make sure you enter valid input")
             else:
-                messagebox.showinfo("You are through!", "Let's play!")
-                root.withdraw()
-                import play
-
-        except EmailError:
-            messagebox.showerror("Error", "THe format of your e-mail address is invalid")
-
+                messagebox.showwarning("Warning", "Sorry you can't play")
         except ValueError:
-            messagebox.showerror("Error", "Your RSA ID number is invalid")
+            messagebox.showerror("Invalid Input", "Please make sure you enter valid input")
 
-        except IdLengthError:
-            messagebox.showerror("Error", "Your RSA ID number should only contain 13 digits")
+        # Method for the exit Button
+    def exit(self):
+        self.message_box = messagebox.askquestion('Exit Application', 'Are you sure you want to exit the application')
+        if self.message_box == 'yes':
+            self.master.destroy()
+        else:
+            pass
 
-LottoGUI(root)
 
+root = Tk()
+app = Login(root)
+root.mainloop()
